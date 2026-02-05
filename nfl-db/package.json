@@ -1,0 +1,41 @@
+{
+  "name": "@nfl/db",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "clean": "rm -rf dist",
+    "migrate": "tsx scripts/migrate.ts",
+    "reset": "tsx scripts/db-reset.ts",
+    "load:playoffs": "tsx scripts/load_playoffs.ts",
+    "agent": "tsx src/server.ts",
+    "studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-agentcore": "^3.966.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.975.0",
+    "@aws-sdk/client-secrets-manager": "^3.966.0",
+    "@aws-sdk/credential-provider-node": "^3.966.0",
+    "@aws-sdk/credential-providers": "^3.966.0",
+    "@hono/node-server": "^1.19.8",
+    "@strands-agents/sdk": "^0.1.4",
+    "aws4": "^1.13.2",
+    "csv-parse": "^6.1.0",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.11.3",
+    "mysql2": "^3.16.0",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/aws4": "^1.11.6",
+    "@types/node": "^24.10.1",
+    "drizzle-kit": "^0.31.8",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3"
+  }
+}
