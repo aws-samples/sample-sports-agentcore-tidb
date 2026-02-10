@@ -68,7 +68,7 @@ You must create your own sports JSON data files in `nfl-db/data/`. The load scri
 - `nfl_player_stats_2026.json` - Player statistics
 - `nfl_injuries_2026.json` - Team injury reports
 
-See `nfl-db/data/` for example file formats.
+See Data Loading below for example file formats.
 
 ### 5. Load data into TiDB
 
