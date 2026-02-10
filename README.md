@@ -243,6 +243,7 @@ You must create your own sports JSON data files. The load script expects these f
     { "player": "...", "team": "...", "status": "Questionable", "injury": "...", "notes": "..." }
   ]
 }
+```
 
 ### Load scripts
 
