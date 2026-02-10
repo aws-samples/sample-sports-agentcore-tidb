@@ -29,7 +29,7 @@ async function invokeAgent(prompt: string, sessionName?: string, rawJson: boolea
   // Session ID must be >= 33 characters
   const runtimeSessionId = sessionName 
     ? `session-${sessionName}-00000000000000000000`
-    : `session-${Date.now()}-${Math.random().toString(36).substring(2)}-${Math.random().toString(36).substring(2)}`;
+    : `session-${Date.now()}-${crypto.randomUUID()}`;
   
   const actorId = 'test-user';
   const memorySessionId = sessionName || `session-${Date.now()}`;
