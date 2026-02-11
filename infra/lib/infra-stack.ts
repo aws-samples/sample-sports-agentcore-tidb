@@ -5,13 +5,23 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as agentcore from '@aws-cdk/aws-bedrock-agentcore-alpha';
 import { Construct } from 'constructs';
 
+export interface InfraStackProps extends cdk.StackProps {
+  /**
+   * ARN of a pre-existing Secrets Manager secret containing TiDB credentials.
+   * Create separately via CLI:
+   *   aws secretsmanager create-secret --name nfl-agent/credentials --secret-string '{...}'
+   * Then pass the ARN to this stack.
+   */
+  readonly secretsArn: string;
+}
+
 export class InfraStack extends cdk.Stack {
   public readonly ecrRepository: ecr.Repository;
   public readonly runtime: agentcore.Runtime;
   public readonly memory: agentcore.Memory;
-  public readonly nflAgentSecrets: secretsmanager.Secret;
+  public readonly nflAgentSecrets: secretsmanager.ISecret;
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: InfraStackProps) {
     super(scope, id, props);
 
     // ECR Repository for sports Agent
@@ -26,13 +36,12 @@ export class InfraStack extends cdk.Stack {
       ],
     });
 
-    // Secrets Manager for sensitive credentials
-    // Secret is created empty - populate via AWS CLI after deployment:
-    // aws secretsmanager put-secret-value --secret-id nfl-agent/credentials --secret-string '{"TIDB_HOST":"...","TIDB_PORT":"4000","TIDB_USERNAME":"...","TIDB_PASSWORD":"...","TIDB_DATABASE":"test"}'
-    this.nflAgentSecrets = new secretsmanager.Secret(this, 'NflAgentSecrets', {
-      secretName: 'nfl-agent/credentials',
-      description: 'Credentials for sports Agent (TiDB, etc.) - populate after deployment',
-    });
+    // Import pre-existing secret - managed outside this stack
+    // Create via: aws secretsmanager create-secret --name nfl-agent/credentials \
+    //   --secret-string '{"TIDB_HOST":"...","TIDB_PORT":"4000","TIDB_USERNAME":"...","TIDB_PASSWORD":"...","TIDB_DATABASE":"test"}'
+    this.nflAgentSecrets = secretsmanager.Secret.fromSecretCompleteArn(
+      this, 'NflAgentSecrets', props.secretsArn
+    );
 
     // AgentCore Memory for conversation history and user preferences
     this.memory = new agentcore.Memory(this, 'NflAgentMemory', {
@@ -85,8 +94,7 @@ export class InfraStack extends cdk.Stack {
         'bedrock:InvokeModelWithResponseStream',
       ],
       resources: [
-        'arn:aws:bedrock:*::foundation-model/*',
-        `arn:aws:bedrock:${this.region}:${this.account}:*`,
+        `arn:aws:bedrock:${this.region}::foundation-model/*`,
       ],
     }));
 

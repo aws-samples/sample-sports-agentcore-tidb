@@ -17,26 +17,30 @@ export const ragSearch = tool({
     const { query, topK = 8 } = input;
     
     const connection = await createRawConnection();
-    const queryEmbedding = await getEmbedding(query);
-    const vectorStr = `[${queryEmbedding.join(',')}]`;
+    try {
+      const queryEmbedding = await getEmbedding(query);
+      const vectorStr = `[${queryEmbedding.join(',')}]`;
 
-    const [results] = await connection.execute(`
-      SELECT team_name, chunk_text, 
-             VEC_COSINE_DISTANCE(embedding, ?) as distance
-      FROM nfl_embeddings
-      ORDER BY distance ASC
-      LIMIT ${topK}
-    `, [vectorStr]);
+      const safeTopK = Math.max(1, Math.min(50, Math.floor(Number(topK))));
 
-    await connection.end();
-    
-    const typedResults = results as EmbeddingResult[];
-    const chunks = typedResults.map((r, i) => 
-      `[${i + 1}] (${r.team_name}, dist: ${parseFloat(String(r.distance)).toFixed(3)}) ${r.chunk_text}`
-    ).join('\n\n');
-    
-    const output = `Found ${typedResults.length} relevant results:\n\n${chunks}`;
-    debugLog('rag_search', 'OUTPUT', output);
-    return output;
+      const [results] = await connection.execute(`
+        SELECT team_name, chunk_text, 
+               VEC_COSINE_DISTANCE(embedding, ?) as distance
+        FROM nfl_embeddings
+        ORDER BY distance ASC
+        LIMIT ?
+      `, [vectorStr, safeTopK]);
+
+      const typedResults = results as EmbeddingResult[];
+      const chunks = typedResults.map((r, i) => 
+        `[${i + 1}] (${r.team_name}, dist: ${parseFloat(String(r.distance)).toFixed(3)}) ${r.chunk_text}`
+      ).join('\n\n');
+      
+      const output = `Found ${typedResults.length} relevant results:\n\n${chunks}`;
+      debugLog('rag_search', 'OUTPUT', output);
+      return output;
+    } finally {
+      await connection.end();
+    }
   },
 });

@@ -1,18 +1,22 @@
-FROM --platform=linux/arm64 public.ecr.aws/docker/library/node:latest
+FROM --platform=linux/arm64 public.ecr.aws/docker/library/node:20-slim
 
 WORKDIR /app
 
-# Copy source code
-COPY . ./
+# Copy package files first for better layer caching
+COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci --omit=dev
 
-# Build TypeScript
+# Copy source and build
+COPY . ./
 RUN npm run build
 
-# Expose port
+# Create non-root user and switch to it
+RUN groupadd -r appuser && useradd -r -g appuser -d /app appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+
 EXPOSE 8080
 
-# Start the application
 CMD ["npm", "start"]
