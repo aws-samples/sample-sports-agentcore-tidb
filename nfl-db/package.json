@@ -23,7 +23,7 @@
     "@hono/node-server": "^1.19.13",
     "@strands-agents/sdk": "^0.2.1",
     "aws4": "^1.13.2",
-    "csv-parse": "^6.1.0",
+    "csv-parse": "^7.0.2",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.12.18",
